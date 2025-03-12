@@ -1,70 +1,100 @@
 import React from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  ScrollView, 
-  TouchableOpacity, 
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
   Dimensions,
-  Image,
   SafeAreaView
 } from 'react-native';
-import { LineChart, BarChart, PieChart } from 'react-native-chart-kit';
 
 const { width } = Dimensions.get('window');
 
+// Simple custom chart components
+const SimpleBarChart = ({ data, labels, color }) => {
+  const maxValue = Math.max(...data);
+  
+  return (
+    <View style={styles.customChartContainer}>
+      <View style={styles.barsContainer}>
+        {data.map((value, index) => (
+          <View key={index} style={styles.barWrapper}>
+            <View 
+              style={[
+                styles.bar, 
+                { 
+                  height: (value / maxValue) * 150,
+                  backgroundColor: color || '#FF8400'
+                }
+              ]}
+            >
+              <Text style={styles.barValue}>{value}</Text>
+            </View>
+            <Text style={styles.barLabel}>{labels[index]}</Text>
+          </View>
+        ))}
+      </View>
+    </View>
+  );
+};
+
+const SimpleLineChart = ({ data, labels, color }) => {
+  return (
+    <View style={styles.customChartContainer}>
+      <View style={styles.lineChartContainer}>
+        {/* Display data points as circles with values */}
+        {data.map((value, index) => (
+          <View key={index} style={styles.dataPointColumn}>
+            <Text style={styles.dataPointValue}>{value}</Text>
+            <View 
+              style={[
+                styles.dataPoint, 
+                { backgroundColor: color || '#5196F4' }
+              ]} 
+            />
+            <Text style={styles.dataPointLabel}>{labels[index]}</Text>
+          </View>
+        ))}
+      </View>
+    </View>
+  );
+};
+
+const SimplePieChart = ({ data }) => {
+  const total = data.reduce((sum, item) => sum + item.value, 0);
+  
+  return (
+    <View style={styles.pieChartContainer}>
+      <View style={styles.pieChartLegend}>
+        {data.map((item, index) => (
+          <View key={index} style={styles.legendItem}>
+            <View style={[styles.legendColor, { backgroundColor: item.color }]} />
+            <Text style={styles.legendText}>
+              {item.name}: {item.value}% ({Math.round(item.value / total * 100)}%)
+            </Text>
+          </View>
+        ))}
+      </View>
+    </View>
+  );
+};
+
 const Dashboard = () => {
   // Mock data for charts and statistics
-  const salesData = {
-    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
-    datasets: [
-      {
-        data: [20, 45, 28, 80, 99, 43],
-        color: (opacity = 1) => `rgba(134, 65, 244, ${opacity})`,
-        strokeWidth: 2
-      }
-    ],
-    legend: ["Monthly Sales"]
-  };
+  const salesData = [20, 45, 28, 80, 99, 43];
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"];
   
-  const categoryData = {
-    labels: ["Clothing", "Electronics", "Home", "Beauty", "Sports"],
-    datasets: [
-      {
-        data: [35, 28, 15, 12, 10]
-      }
-    ]
-  };
+  // Bar chart data
+  const categoryData = [35, 28, 15, 12, 10];
+  const categories = ["Clothing", "Electronics", "Home", "Beauty", "Sports"];
   
+  // Pie chart data
   const pieData = [
-    {
-      name: "New",
-      population: 45,
-      color: "#FF8A65",
-      legendFontColor: "#7F7F7F",
-      legendFontSize: 12
-    },
-    {
-      name: "Processing",
-      population: 28,
-      color: "#4FC3F7",
-      legendFontColor: "#7F7F7F",
-      legendFontSize: 12
-    },
-    {
-      name: "Shipped",
-      population: 15,
-      color: "#AED581",
-      legendFontColor: "#7F7F7F",
-      legendFontSize: 12
-    },
-    {
-      name: "Delivered",
-      population: 12,
-      color: "#7986CB",
-      legendFontColor: "#7F7F7F",
-      legendFontSize: 12
-    }
+    { name: 'New', value: 45, color: '#FF8A65' },
+    { name: 'Processing', value: 28, color: '#4FC3F7' },
+    { name: 'Shipped', value: 15, color: '#AED581' },
+    { name: 'Delivered', value: 12, color: '#7986CB' }
   ];
   
   const recentOrders = [
@@ -75,22 +105,12 @@ const Dashboard = () => {
   ];
   
   const topProducts = [
-    { name: 'Wireless Headphones', sales: 245, image: 'https://placeholder.com/100' },
-    { name: 'Smart Watch Series 5', sales: 190, image: 'https://placeholder.com/100' },
-    { name: 'Designer T-shirt', sales: 175, image: 'https://placeholder.com/100' },
-    { name: 'Premium Sneakers', sales: 162, image: 'https://placeholder.com/100' },
+    { name: 'Wireless Headphones', sales: 245 },
+    { name: 'Smart Watch Series 5', sales: 190 },
+    { name: 'Designer T-shirt', sales: 175 },
+    { name: 'Premium Sneakers', sales: 162 },
   ];
 
-  // Chart configurations
-  const chartConfig = {
-    backgroundGradientFrom: "#ffffff",
-    backgroundGradientTo: "#ffffff",
-    color: (opacity = 1) => `rgba(81, 150, 244, ${opacity})`,
-    strokeWidth: 2,
-    barPercentage: 0.5,
-    decimalPlaces: 0,
-  };
-  
   const getStatusColor = (status) => {
     switch(status) {
       case 'Delivered': return '#4CAF50';
@@ -138,44 +158,27 @@ const Dashboard = () => {
         {/* Sales Chart */}
         <View style={styles.chartCard}>
           <Text style={styles.chartTitle}>Sales Overview</Text>
-          <LineChart
-            data={salesData}
-            width={width - 40}
-            height={220}
-            chartConfig={chartConfig}
-            bezier
-            style={styles.chart}
+          <SimpleLineChart 
+            data={salesData} 
+            labels={months}
+            color="#5196F4"
           />
         </View>
         
         {/* Categories Chart */}
         <View style={styles.chartCard}>
           <Text style={styles.chartTitle}>Sales by Category</Text>
-          <BarChart
-            data={categoryData}
-            width={width - 40}
-            height={220}
-            chartConfig={{
-              ...chartConfig,
-              color: (opacity = 1) => `rgba(255, 132, 0, ${opacity})`,
-            }}
-            style={styles.chart}
+          <SimpleBarChart 
+            data={categoryData} 
+            labels={categories}
+            color="#FF8400"
           />
         </View>
         
         {/* Orders Status */}
         <View style={styles.chartCard}>
           <Text style={styles.chartTitle}>Orders Status</Text>
-          <PieChart
-            data={pieData}
-            width={width - 40}
-            height={200}
-            chartConfig={chartConfig}
-            accessor="population"
-            backgroundColor="transparent"
-            paddingLeft="15"
-            absolute
-          />
+          <SimplePieChart data={pieData} />
         </View>
         
         {/* Recent Orders */}
@@ -230,7 +233,7 @@ const Dashboard = () => {
       </ScrollView>
       
       {/* Bottom Navigation */}
-      <View style={styles.bottomNav}>
+      {/* <View style={styles.bottomNav}>
         <TouchableOpacity style={styles.navItem}>
           <Text style={[styles.navIcon, styles.activeNavIcon]}>🏠</Text>
           <Text style={[styles.navText, styles.activeNavText]}>Home</Text>
@@ -247,7 +250,7 @@ const Dashboard = () => {
           <Text style={styles.navIcon}>👤</Text>
           <Text style={styles.navText}>Profile</Text>
         </TouchableOpacity>
-      </View>
+      </View> */}
     </SafeAreaView>
   );
 };
@@ -256,6 +259,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F5F7FA',
+    
   },
   header: {
     flexDirection: 'row',
@@ -343,9 +347,97 @@ const styles = StyleSheet.create({
     color: '#333333',
     marginBottom: 15,
   },
-  chart: {
-    marginVertical: 8,
-    borderRadius: 10,
+  // Custom chart styles
+  customChartContainer: {
+    marginVertical: 10,
+    height: 200,
+  },
+  // Bar chart styles
+  barsContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'space-around',
+    height: 170,
+    paddingBottom: 20,
+  },
+  barWrapper: {
+    alignItems: 'center',
+    width: (width - 80) / 5,
+  },
+  bar: {
+    width: 20,
+    minHeight: 5,
+    borderTopLeftRadius: 3,
+    borderTopRightRadius: 3,
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+  },
+  barValue: {
+    fontSize: 10,
+    color: '#333',
+    marginTop: -16,
+  },
+  barLabel: {
+    fontSize: 10,
+    color: '#757575',
+    marginTop: 5,
+    textAlign: 'center',
+  },
+  // Line chart styles
+  lineChartContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'flex-end',
+    height: 170,
+    paddingBottom: 20,
+  },
+  dataPointColumn: {
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    height: '100%',
+  },
+  dataPoint: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginBottom: 5,
+  },
+  dataPointValue: {
+    fontSize: 10,
+    color: '#333',
+    marginBottom: 3,
+  },
+  dataPointLabel: {
+    fontSize: 10,
+    color: '#757575',
+    marginTop: 5,
+  },
+  // Pie chart styles
+  pieChartContainer: {
+    marginVertical: 10,
+    alignItems: 'center',
+  },
+  pieChartLegend: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    paddingVertical: 20,
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 10,
+    marginVertical: 5,
+  },
+  legendColor: {
+    width: 15,
+    height: 15,
+    borderRadius: 8,
+    marginRight: 5,
+  },
+  legendText: {
+    fontSize: 12,
+    color: '#757575',
   },
   sectionCard: {
     backgroundColor: '#FFFFFF',

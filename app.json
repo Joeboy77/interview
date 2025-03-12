@@ -8,7 +8,7 @@
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/sp.png",
+      "image": "./assets/sp.jpg",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
